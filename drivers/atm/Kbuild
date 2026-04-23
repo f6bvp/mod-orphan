@@ -18,7 +18,6 @@ obj-m += fore_200e.o
 obj-m += eni.o
 obj-m += idt77252.o
 obj-m += idt77105.o
-obj-m += solos-pci.o
 obj-m += adummy.o
 obj-m += atmtcp.o
 obj-m += lanai.o
