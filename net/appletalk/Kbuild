@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: GPL-2.0
+#
+# EtherTalk runs over 802.2 SNAP, so the host kernel must provide
+# register_snap_client() (net/802/psnap.o). That object is built by
+# CONFIG_LLC, which has no prompt of its own - enable CONFIG_LLC2 (or
+# another LLC user) in the host kernel. In-tree this was guaranteed by
+# "config ATALK select LLC".
+
+ccflags-y += -include $(src)/../../include/hamradio_compat.h
+
+obj-m += appletalk.o
+
+appletalk-y := ddp.o aarp.o atalk_proc.o sysctl_net_atalk.o

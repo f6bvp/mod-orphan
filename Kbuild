@@ -15,3 +15,5 @@ obj-m += drivers/isdn/capi/
 obj-m += drivers/isdn/mISDN/
 obj-m += drivers/isdn/hardware/
 obj-m += net/bluetooth/cmtp/
+
+obj-m += net/appletalk/
