@@ -106,6 +106,10 @@ static int rose_state3_machine(struct sock *sk, struct sk_buff *skb, int framety
 {
 	struct rose_sock *rose = rose_sk(sk);
 	int queued = 0;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 17, 0) && \
+    LINUX_VERSION_CODE < KERNEL_VERSION(7, 1, 0)
+	enum skb_drop_reason dr; /* ignored */
+#endif
 
 	switch (frametype) {
 	case ROSE_RESET_REQUEST:
@@ -166,7 +170,12 @@ static int rose_state3_machine(struct sock *sk, struct sk_buff *skb, int framety
 		rose_frames_acked(sk, nr);
 		if (ns == rose->vr) {
 			rose_start_idletimer(sk);
-			if (!sk_filter_trim_cap(sk, skb, ROSE_MIN_LEN, NULL) &&
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 17, 0) && \
+    LINUX_VERSION_CODE < KERNEL_VERSION(7, 1, 0)
+			if (!sk_filter_trim_cap(sk, skb, ROSE_MIN_LEN, &dr) &&
+#else
+			if (!sk_filter_trim_cap(sk, skb, ROSE_MIN_LEN) &&
+#endif
 			    __sock_queue_rcv_skb(sk, skb) == 0) {
 				rose->vr = (rose->vr + 1) % ROSE_MODULUS;
 				queued = 1;
