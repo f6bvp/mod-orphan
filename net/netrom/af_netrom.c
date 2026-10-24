@@ -935,8 +935,13 @@ int nr_rx_frame(struct sk_buff *skb, struct net_device *dev)
 	}
 
 	if (sk != NULL) {
-		/* nr_state1_machine() reads the window size at byte 20 */
-		if (frametype == NR_CONNACK &&
+		/*
+		 * nr_state1_machine() reads the window size at byte 20, but
+		 * only for a plain CONNACK. A CONNACK with the choke flag set
+		 * is a refusal or a reset, sent as a 20-byte frame by
+		 * __nr_transmit_reply(), and must not be dropped here.
+		 */
+		if (frametype == NR_CONNACK && !flags &&
 		    skb->len < NR_NETWORK_LEN + NR_TRANSPORT_LEN + 1) {
 			sock_put(sk);
 			return 0;
