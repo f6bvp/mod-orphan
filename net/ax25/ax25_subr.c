@@ -57,12 +57,13 @@ void ax25_frames_acked(ax25_cb *ax25, unsigned short nr)
 	 * free the frames once the lock is dropped.
 	 */
 	spin_lock_bh(&ax25->lock);
-	if (ax25->va != nr) {
-		while (skb_peek(&ax25->ack_queue) != NULL && ax25->va != nr) {
-			skb = skb_dequeue(&ax25->ack_queue);
-			__skb_queue_tail(&acked, skb);
-			ax25->va = (ax25->va + 1) % ax25->modulus;
-		}
+	/*
+	 * ax25_clear_queues() purges the ack queue without ax25->lock: test
+	 * what skb_dequeue() returns, not what skb_peek() saw before it.
+	 */
+	while (ax25->va != nr && (skb = skb_dequeue(&ax25->ack_queue)) != NULL) {
+		__skb_queue_tail(&acked, skb);
+		ax25->va = (ax25->va + 1) % ax25->modulus;
 	}
 	spin_unlock_bh(&ax25->lock);
 
